@@ -19,8 +19,8 @@ from torch.autograd import Variable
 import time
 import shutil
 
-print_freq = 2
-max_epoch = 2
+print_freq = 10
+max_epoch = 200
 # 0.1 0.001
 base_lr = 0.01
 # 0.1 0.9
@@ -128,6 +128,14 @@ class dnn_fitness(base_ff):
 
         self.train_loader = DataLoader(train_set, batch_size=32, shuffle=False,
                                        num_workers=1, pin_memory=True)
+        # Set list of individual fitness functions.
+        self.num_obj = 2
+        dummyfit = base_ff()
+        dummyfit.maximise = True
+        self.fitness_functions = [dummyfit, dummyfit]
+        self.default_fitness = [float('nan'), float('nan')]
+
+
     def evaluate(self, ind, **kwargs):
         phenotype = ind.phenotype
         fitness = 0
@@ -172,9 +180,26 @@ class dnn_fitness(base_ff):
                              'best_prec1': best_prec1,
                              'optimizer': optimizer.state_dict(),
                              }, filename='deeplearn/model_{}.pth.tar'.format(name))
-        fitness = prec1
+        fitness = [prec1, size]
         print("FITNESS:", fitness)
         return fitness
+
+    @staticmethod
+    def value(fitness_vector, objective_index):
+        """
+        This is a static method required by NSGA-II for sorting populations
+        based on a given fitness function, or for returning a given index of a
+        population based on a given fitness function.
+
+        :param fitness_vector: A vector/list of fitnesses.
+        :param objective_index: The index of the desired fitness.
+        :return: The fitness at the objective index of the fitness vecror.
+        """
+
+        if not isinstance(fitness_vector, list):
+            return float("inf")
+
+        return fitness_vector[objective_index]
 
 class face(Dataset):
     def __init__(self, hdf5_file):
