@@ -1,0 +1,12 @@
+<settings> ::= <conv>{::}<fc>{::}<kernels>{::}<fc_hidden>{::}<filters>
+<conv_range> ::= 1|2|3|4
+<fc_range> ::= 0|1
+<kernels_range> ::= 3|5|7
+<fc_hidden_range> ::= 30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50
+<filters_range> ::= 8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30
+
+<conv> ::= conv = <conv_range>
+<fc> ::= fc = <fc_range>
+<kernels> ::= kernels = <kernels_range>
+<fc_hidden> ::= fc_hidden =  <fc_hidden_range>
+<filters> ::= filters =  <filters_range>

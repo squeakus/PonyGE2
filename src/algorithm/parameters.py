@@ -13,8 +13,8 @@ params = {
         'STEP': 'step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 500,
-        'GENERATIONS': 50,
+        'POPULATION_SIZE': 100,
+        'GENERATIONS': 1000,
         'HILL_CLIMBING_HISTORY': 1000,
         'SCHC_COUNT_METHOD': "count_all",
 
@@ -183,7 +183,7 @@ params = {
         'AGENT_SIZE': 100,
         # Interaction Probablity. How frequently the agents can interaction with each other
         'INTERACTION_PROBABILITY': 0.5,
-        
+
         # OTHER
         # Set machine name (useful for doing multiple runs)
         'MACHINE': machine_name
@@ -230,7 +230,7 @@ def load_params(file_name):
 
             # Set parameter
             params[key] = value
-        
+
 
 def set_params(command_line_args, create_files=True):
     """
