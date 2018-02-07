@@ -19,8 +19,8 @@ from torch.autograd import Variable
 import time
 import shutil
 
-print_freq = 10
-max_epoch = 20
+print_freq = 2
+max_epoch = 2
 # 0.1 0.001
 base_lr = 0.01
 # 0.1 0.9
@@ -53,7 +53,7 @@ class create_network(nn.Module, base_ff):
             n_i = n_o
 
         self.n_size = self._get_conv_output(input_shape)
-        print(self.n_size)
+        print("size", self.n_size)
 
         if settings['fc'] == 0:
 
@@ -116,6 +116,8 @@ class create_network(nn.Module, base_ff):
 
 class dnn_fitness(base_ff):
     maximise = True
+    multi_objective = True
+
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
@@ -129,59 +131,49 @@ class dnn_fitness(base_ff):
     def evaluate(self, ind, **kwargs):
         phenotype = ind.phenotype
         fitness = 0
-        n_iterations = 100
         settings = {}
 
         try:
             t0 = time.time()
             exec(phenotype, settings)
+            model = create_network(settings)
             print("\n" + phenotype)
-        except:
+            print(model)
+            if torch.cuda.is_available():
+                model.cuda()
+
+        except Exception as e:
             fitness = self.default_fitness
+            print("Error", e)
 
-        i = 0
-        while(i < n_iterations):
-            # sample from range
-            try:
+        size = 0
+        for key, module in model._modules.items():
+            params = sum([np.prod(p.size()) for p in module.parameters()])
+            size += params
 
-                model = create_network(settings)
+        criterion = nn.CrossEntropyLoss().cuda()
+        optimizer = torch.optim.SGD(
+            model.parameters(), base_lr, momentum=momentum, weight_decay=weight_decay)
+        best_prec1 = 0
+        for epoch in range(1, max_epoch):
 
-                print(model)
-                if torch.cuda.is_available():
-                    model.cuda()
+            # train for one epoch
+            train(self.train_loader, model, criterion,
+                  optimizer, epoch, settings)
 
-            except Exception as e:
-                print(e)
-                continue
+            # evaluate on validation set
+            prec1, val_loss, name = test(
+                self.test_loader, criterion, model, settings)
 
-            size = 0
-            for key, module in model._modules.items():
-                params = sum([np.prod(p.size()) for p in module.parameters()])
-                size += params
-
-            criterion = nn.CrossEntropyLoss().cuda()
-            optimizer = torch.optim.SGD(
-                model.parameters(), base_lr, momentum=momentum, weight_decay=weight_decay)
-            best_prec1 = 0
-            for epoch in range(1, max_epoch):
-
-                # train for one epoch
-                train(self.train_loader, model, criterion,
-                      optimizer, epoch, settings)
-
-                # evaluate on validation set
-                prec1, val_loss, name = test(
-                    self.test_loader, criterion, model, settings)
-
-                # remember best prec@1 and save checkpoint
-                best_prec1 = max(prec1, best_prec1)
-                save_checkpoint({'epoch': epoch + 1,
-                                 'state_dict': model.state_dict(),
-                                 'best_prec1': best_prec1,
-                                 'optimizer': optimizer.state_dict(),
-                                 }, filename='deeplearn/model_{}.pth.tar'.format(name))
+            # remember best prec@1 and save checkpoint
+            best_prec1 = max(prec1, best_prec1)
+            save_checkpoint({'epoch': epoch + 1,
+                             'state_dict': model.state_dict(),
+                             'best_prec1': best_prec1,
+                             'optimizer': optimizer.state_dict(),
+                             }, filename='deeplearn/model_{}.pth.tar'.format(name))
         fitness = prec1
-        print("fitness:", fitness)
+        print("FITNESS:", fitness)
         return fitness
 
 class face(Dataset):
