@@ -115,11 +115,12 @@ class create_network(nn.Module, base_ff):
 
 
 class dnn_fitness(base_ff):
+    maximise = True
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-        test_set = face(['/home/jonathan/code/PonyGE2/src/deeplearn/test.hdf5'])
-        train_set = face(['/home/jonathan/code/PonyGE2/src/deeplearn/train.hdf5'])
+        test_set = face(['./deeplearn/test.hdf5'])
+        train_set = face(['./deeplearn/train.hdf5'])
         self.test_loader = DataLoader(test_set, shuffle=False, batch_size=32,
                                       num_workers=1)
 
@@ -128,14 +129,13 @@ class dnn_fitness(base_ff):
     def evaluate(self, ind, **kwargs):
         phenotype = ind.phenotype
         fitness = 0
-        n_iterations = 1000
+        n_iterations = 100
         settings = {}
 
         try:
             t0 = time.time()
             exec(phenotype, settings)
             print("\n" + phenotype)
-            print(settings)
         except:
             fitness = self.default_fitness
 
@@ -179,16 +179,10 @@ class dnn_fitness(base_ff):
                                  'state_dict': model.state_dict(),
                                  'best_prec1': best_prec1,
                                  'optimizer': optimizer.state_dict(),
-                                 }, filename='models/monte_carlo/model_{}.pth.tar'.format(name))
-
-            fp.write('{},{},{},{}\n'.format(name, size, val_loss, best_prec1))
-            fp.flush()
-            print('[{}], Size: {}, Loss: {}, Accuracy: {}\n'.format(
-                i, size, val_loss, best_prec1))
-            i += 1
-
-        fp.close()
-
+                                 }, filename='deeplearn/model_{}.pth.tar'.format(name))
+        fitness = prec1
+        print("fitness:", fitness)
+        return fitness
 
 class face(Dataset):
     def __init__(self, hdf5_file):
@@ -251,7 +245,7 @@ def save_checkpoint(state, filename):
     torch.save(state, filename)
 
 
-def train(train_loader, model, criterion, optimizer, epoch):
+def train(train_loader, model, criterion, optimizer, epoch, settings):
     correct = 0
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -271,7 +265,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         target_var = torch.autograd.Variable(target)
 
         # compute output
-        output, name = model(input_var.float(), settings['conv'], settings['fc'])
+        output, name = model(input_var.float(), settings)
         loss = criterion(output, target_var)
 
         # measure accuracy and record loss
@@ -322,7 +316,7 @@ def test(test_loader, criterion, model, settings):
         target_var = torch.autograd.Variable(target, volatile=True)
 
         # compute output
-        output, name = model(input_var.float(), settings['conv'], settings['fc'])
+        output, name = model(input_var.float(), settings)
         loss = criterion(output, target_var)
 
         # measure accuracy and record loss
@@ -347,7 +341,3 @@ def test(test_loader, criterion, model, settings):
 
     res = correct / len(test_loader.dataset)
     return res, losses.avg, name
-
-
-if __name__ == '__main__':
-    montecarlo()
