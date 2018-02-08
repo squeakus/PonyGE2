@@ -19,8 +19,8 @@ from torch.autograd import Variable
 import time
 import shutil
 
-print_freq = 10
-max_epoch = 200
+print_freq = 100
+max_epoch = 1000
 # 0.1 0.001
 base_lr = 0.01
 # 0.1 0.9
