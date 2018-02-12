@@ -53,6 +53,8 @@ class create_network(nn.Module, base_ff):
 
         self.n_size = self._get_conv_output(input_shape)
         print("size", self.n_size)
+        print("conv layers", settings['conv_layers'])
+        print("fc layers", settings['fc_layers'])
 
         if settings['fc'] == 0:
 
