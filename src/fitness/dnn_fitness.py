@@ -35,9 +35,8 @@ class create_network(nn.Module, base_ff):
         self.name = ""
         self.conv = nn.ModuleList()
 
-        for i in range(settings['conv']):
-            k = settings['kernels']
-            n_o = settings['filters']
+        for i in range(len(settings['conv_layers'])):
+            k, n_o = settings['conv_layers'][i]
             self.name += "C_{}_{}_".format(k, n_o)
 
             if i == 0:
@@ -64,7 +63,7 @@ class create_network(nn.Module, base_ff):
         else:
             self.fc = nn.ModuleList()
             for i in range(settings['fc']):
-                fc_o = settings['fc_hidden']
+                fc_o = settings['fc_layers'][i]
                 self.name += "FC_{}_".format(fc_o)
 
                 if i == 0:
@@ -145,7 +144,6 @@ class dnn_fitness(base_ff):
             t0 = time.time()
             exec(phenotype, settings)
             model = create_network(settings)
-            print("\n" + phenotype)
             print(model)
             if torch.cuda.is_available():
                 model.cuda()

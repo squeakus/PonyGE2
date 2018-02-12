@@ -1,9 +1,13 @@
-<settings> ::= conv = <conv_range> {::}
-               fc = <fc_range>{::}
-               kernels = <kernels_range>{::}
-               fc_hidden = <fc_hidden_range>{::}
-               filters =  <filters_range>
-<conv_range> ::= 1|2|3|4
+<settings> ::= fc = <fc_range>{::}
+               conv_layers = []{::}
+               fc_layers = []{::}
+               <conv_layers> {::}
+               <forfc> {::}
+
+<conv_layers> ::= <cl> | <cl><cl> | <cl><cl><cl> | <cl><cl><cl><cl>
+<cl> ::= conv_layers.append((<kernels_range>, <filters_range>)){::}
+<forfc> ::= for i in range(fc):{:<flfc-code>:}
+<flfc-code> ::= fc_layers.append(<fc_hidden_range>)
 <fc_range> ::= 0|1
 <kernels_range> ::= 3|5|7
 <fc_hidden_range> ::= 30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50
