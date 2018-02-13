@@ -26,7 +26,7 @@ base_lr = 0.01
 # 0.1 0.9
 momentum = 0.9
 weight_decay = 0.0005
-MOO = 1
+
 class create_network(nn.Module, base_ff):
 
     def __init__(self, settings, input_shape=(3, 120, 160)):
@@ -118,7 +118,6 @@ class create_network(nn.Module, base_ff):
 class dnn_fitness(base_ff):
     maximise = True
     multi_objective = True
-
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
@@ -180,11 +179,10 @@ class dnn_fitness(base_ff):
         #                      'best_prec1': best_prec1,
         #                      'optimizer': optimizer.state_dict(),
         #                      }, filename='deeplearn/model_{}.pth.tar'.format(name))
-        xfit = random.randint(1,10 + MOO)
-        yfit = (random.randint(10,100) / xfit) + MOO
-        #fitness = [prec1, size]
-        fitness = [xfit, yfit]
-        MOO + 100
+
+        x = np.random.pareto(4,2)
+        fitness = [x[0], x[1]]
+
         return fitness
 
     @staticmethod

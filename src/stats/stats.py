@@ -56,7 +56,6 @@ def get_stats(individuals, end=False):
 
     if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
         # Multiple objective optimisation is being used.
-
         # Remove fitness stats from the stats dictionary.
         stats.pop('best_fitness', None)
         stats.pop('ave_fitness', None)
@@ -215,7 +214,9 @@ def get_moo_stats(individuals, end):
                 to_plot = [i[o] for i in trackers.best_fitness_list]
 
                 # Plot fitness data for objective o.
-                save_plot_from_data(to_plot, ff.__class__.__name__)
+                plotname = ff.__class__.__name__ + str(o)
+
+                save_plot_from_data(to_plot, plotname)
 
             # TODO: PonyGE2 can currently only plot moo problems with 2 objectives.
             # Check that the number of fitness objectives is not greater than 2

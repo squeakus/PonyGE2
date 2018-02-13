@@ -104,7 +104,6 @@ def save_first_front_to_file(stats, end=False, name="first"):
 
     # Create front folder.
     makedirs(params['FILE_PATH'])
-
     for i, ind in enumerate(trackers.best_ever):
         # Save each individual in the first front to file.
         save_best_ind_to_file(stats, ind, end, name=str(i))
